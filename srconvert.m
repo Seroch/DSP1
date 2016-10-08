@@ -3,28 +3,33 @@ function out=srconvert(in)
 %Sebastien Charles
 %DSP Matlab project 1
 
-L = 148;
-M = 321;
+L = 320;
+M = 147;
 
-x = upsample(in, L);
+x1 = upsample(in, 5);
 
-%Filter
+h1 = designfilt('lowpassfir', 'PassbandFrequency', 1/5, ...
+               'StopbandFrequency', (1.2/5), 'PassbandRipple', 0.1, ...
+               'StopbandAttenuation', 70, 'DesignMethod', 'equiripple');
+           
+x2 = fftfilt(h1 , x1);
 
-Fpass = (11025/24000);          % Passband Frequency
-Fstop = 1.2*Fpass;              % Stopband Frequency
-Apass = 0.1;                    % Passband Ripple (dB)
-Astop = 80;                     % Stopband Attenuation (dB)
+x2 = upsample(x2, 8);
 
-h = designfilt('lowpassfir', 'PassbandFrequency', Fpass, ...
-               'StopbandFrequency', Fstop, 'PassbandRipple', Apass, ...
-               'StopbandAttenuation', Astop, 'SampleRate', 2, ...
-               'DesignMethod', 'equiripple');
+h2 = designfilt('lowpassfir', 'PassbandFrequency', 1/8, ...
+               'StopbandFrequency', (1.2/8), 'PassbandRipple', 0.1, ...
+               'StopbandAttenuation', 70, 'DesignMethod', 'equiripple');
+           
+x3 = fftfilt(h2 , x2);
+           
+x3 = upsample(x3, 8);
 
-%info(h)
-%fvtool(h)
+h3 = designfilt('lowpassfir', 'PassbandFrequency', 1/8, ...
+               'StopbandFrequency', (1.2/8), 'PassbandRipple', 0.1, ...
+               'StopbandAttenuation', 70, 'DesignMethod', 'equiripple');
 
-%/filter
-        
-y = filter(h , x);
+           
+y = fftfilt(h3 , x3);
 
 out = downsample(y, M);
+
